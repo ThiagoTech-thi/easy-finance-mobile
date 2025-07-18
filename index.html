@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Finance Mobile - Controle Financeiro</title>
+    <meta name="description" content="Sistema de controle financeiro otimizado para smartphones">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            overflow-x: hidden;
+        }
+        
+        .mobile-app {
+            max-width: 480px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .mobile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 20px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .mobile-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+        }
+        
+        .mobile-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .mobile-header .subtitle {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .mobile-content {
+            padding: 20px;
+            min-height: calc(100vh - 200px);
+        }
+        
+        .stat-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 2px solid #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card.receita {
+            border-color: #28a745;
+            background: linear-gradient(145deg, #ffffff, #f8fff9);
+        }
+        
+        .stat-card.despesa {
+            border-color: #dc3545;
+            background: linear-gradient(145deg, #ffffff, #fff8f8);
+        }
+        
+        .stat-card .icon {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card.receita .icon {
+            color: #28a745;
+        }
+        
+        .stat-card.despesa .icon {
+            color: #dc3545;
+        }
+        
+        .stat-card .value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .label {
+            font-size: 0.8rem;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .saldo-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 25px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.3);
+        }
+        
+        .saldo-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .saldo-card .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+        
+        .transaction-form {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .form-control {
+            border-radius: 15px;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-select {
+            border-radius: 15px;
+            padding: 12px 16px;
+            border: 2px solid #e9ecef;
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            border: none;
+            border-radius: 15px;
+            padding: 12px 24px;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .transaction-list {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .transaction-item {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+        
+        .transaction-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
+        }
+        
+        .transaction-item.receita {
+            border-left-color: #28a745;
+        }
+        
+        .transaction-item.despesa {
+            border-left-color: #dc3545;
+        }
+        
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .transaction-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .transaction-amount {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+        
+        .transaction-amount.receita {
+            color: #28a745;
+        }
+        
+        .transaction-amount.despesa {
+            color: #dc3545;
+        }
+        
+        .transaction-date {
+            font-size: 0.85rem;
+            color: #6c757d;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+        
+        .mobile-footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .auth-container {
+            padding: 40px 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .auth-form {
+            background: white;
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .auth-logo i {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        
+        .auth-logo h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .auth-logo .subtitle {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        
+        .demo-accounts {
+            background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            font-size: 0.85rem;
+            color: #333;
+            text-align: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .demo-accounts strong {
+            color: #667eea;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .demo-account {
+            background: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            border: 1px solid #f0f0f0;
+        }
+        
+        .form-toggle {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .form-toggle button {
+            background: none;
+            border: none;
+            color: #667eea;
+            text-decoration: underline;
+            font-size: 0.9rem;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .quick-add {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .quick-add button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            transition: all 0.3s ease;
+        }
+        
+        .quick-add button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+        }
+        
+        .github-info {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 20px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+        }
+        
+        .github-info strong {
+            color: #495057;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .github-info small {
+            color: #6c757d;
+            font-size: 0.75rem;
+        }
+        
+        @media (max-width: 480px) {
+            .mobile-app {
+                max-width: 100%;
+                box-shadow: none;
+            }
+            
+            .stat-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-card {
+                padding: 15px;
+            }
+            
+            .mobile-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        // Sistema de armazenamento local
+        const LocalStorage = {
+            users: JSON.parse(localStorage.getItem('easyfinance_mobile_users') || '[]'),
+            currentUser: JSON.parse(localStorage.getItem('easyfinance_mobile_currentuser') || 'null'),
+            
+            saveUsers: function() {
+                localStorage.setItem('easyfinance_mobile_users', JSON.stringify(this.users));
+            },
+            
+            saveCurrentUser: function(user) {
+                this.currentUser = user;
+                localStorage.setItem('easyfinance_mobile_currentuser', JSON.stringify(user));
+            },
+            
+            addUser: function(user) {
+                this.users.push(user);
+                this.saveUsers();
+            },
+            
+            findUser: function(email) {
+                return this.users.find(u => u.email === email);
+            },
+            
+            getUserTransactions: function(userId) {
+                return JSON.parse(localStorage.getItem(`easyfinance_mobile_transactions_${userId}`) || '[]');
+            },
+            
+            saveUserTransactions: function(userId, transactions) {
+                localStorage.setItem(`easyfinance_mobile_transactions_${userId}`, JSON.stringify(transactions));
+            }
+        };
+        
+        // Inicializar usuários demo
+        if (LocalStorage.users.length === 0) {
+            LocalStorage.users = [
+                {
+                    id: 1,
+                    name: 'João Silva',
+                    email: 'joao@mobile.com',
+                    password: '123456',
+                    role: 'user'
+                },
+                {
+                    id: 2,
+                    name: 'Maria Santos',
+                    email: 'maria@mobile.com',
+                    password: '123456',
+                    role: 'user'
+                },
+                {
+                    id: 3,
+                    name: 'Carlos Oliveira',
+                    email: 'carlos@mobile.com',
+                    password: '123456',
+                    role: 'user'
+                }
+            ];
+            LocalStorage.saveUsers();
+            
+            // Transações demo para João
+            LocalStorage.saveUserTransactions(1, [
+                { id: 1, type: 'receita', description: 'Salário', amount: 3500, date: '2024-01-15' },
+                { id: 2, type: 'despesa', description: 'Supermercado', amount: 350, date: '2024-01-14' },
+                { id: 3, type: 'despesa', description: 'Transporte', amount: 120, date: '2024-01-13' },
+                { id: 4, type: 'receita', description: 'Freelance', amount: 800, date: '2024-01-12' },
+                { id: 5, type: 'despesa', description: 'Internet', amount: 80, date: '2024-01-11' }
+            ]);
+            
+            // Transações demo para Maria
+            LocalStorage.saveUserTransactions(2, [
+                { id: 6, type: 'receita', description: 'Vendas', amount: 2200, date: '2024-01-16' },
+                { id: 7, type: 'despesa', description: 'Aluguel', amount: 1200, date: '2024-01-01' },
+                { id: 8, type: 'despesa', description: 'Luz', amount: 150, date: '2024-01-10' }
+            ]);
+            
+            // Transações demo para Carlos
+            LocalStorage.saveUserTransactions(3, [
+                { id: 9, type: 'receita', description: 'Consultoria', amount: 1500, date: '2024-01-17' },
+                { id: 10, type: 'despesa', description: 'Gasolina', amount: 200, date: '2024-01-15' }
+            ]);
+        }
+        
+        const useAuth = () => {
+            const [user, setUser] = useState(LocalStorage.currentUser);
+            const [isLoading, setIsLoading] = useState(false);
+            
+            const login = async (email, password) => {
+                setIsLoading(true);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const foundUser = LocalStorage.findUser(email);
+                if (foundUser && foundUser.password === password) {
+                    setUser(foundUser);
+                    LocalStorage.saveCurrentUser(foundUser);
+                    setIsLoading(false);
+                    return { success: true };
+                }
+                
+                setIsLoading(false);
+                return { success: false, error: 'Credenciais inválidas' };
+            };
+            
+            const register = async (name, email, password) => {
+                setIsLoading(true);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                if (LocalStorage.findUser(email)) {
+                    setIsLoading(false);
+                    return { success: false, error: 'Email já cadastrado' };
+                }
+                
+                const newUser = {
+                    id: Date.now(),
+                    name,
+                    email,
+                    password,
+                    role: 'user'
+                };
+                
+                LocalStorage.addUser(newUser);
+                LocalStorage.saveUserTransactions(newUser.id, []);
+                setUser(newUser);
+                LocalStorage.saveCurrentUser(newUser);
+                
+                setIsLoading(false);
+                return { success: true };
+            };
+            
+            const logout = () => {
+                setUser(null);
+                LocalStorage.saveCurrentUser(null);
+            };
+            
+            return { user, isLoading, login, register, logout };
+        };
+        
+        const MobileLogin = ({ onLogin, onRegister, isLoading }) => {
+            const [isLogin, setIsLogin] = useState(true);
+            const [formData, setFormData] = useState({
+                name: '',
+                email: '',
+                password: ''
+            });
+            const [error, setError] = useState('');
+            
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setError('');
+                
+                const result = isLogin 
+                    ? await onLogin(formData.email, formData.password)
+                    : await onRegister(formData.name, formData.email, formData.password);
+                
+                if (!result.success) {
+                    setError(result.error);
+                }
+            };
+            
+            return (
+                <div className="mobile-app">
+                    <div className="auth-container fade-in">
+                        <div className="auth-form">
+                            <div className="auth-logo">
+                                <i className="fas fa-mobile-alt"></i>
+                                <h2>Easy Finance</h2>
+                                <div className="subtitle">Finanças na palma da mão</div>
+                            </div>
+                            
+                            {error && (
+                                <div className="alert alert-danger" role="alert">
+                                    {error}
+                                </div>
+                            )}
+                            
+                            <form onSubmit={handleSubmit}>
+                                {!isLogin && (
+                                    <div className="mb-3">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Nome completo"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            required
+                                        />
+                                    </div>
+                                )}
+                                
+                                <div className="mb-3">
+                                    <input
+                                        type="email"
+                                        className="form-control"
+                                        placeholder="Email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                        required
+                                    />
+                                </div>
+                                
+                                <div className="mb-3">
+                                    <input
+                                        type="password"
+                                        className="form-control"
+                                        placeholder="Senha"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                        required
+                                    />
+                                </div>
+                                
+                                <button 
+                                    type="submit" 
+                                    className="btn btn-primary"
+                                    disabled={isLoading}
+                                >
+                                    {isLoading ? 'Carregando...' : (isLogin ? 'Entrar' : 'Criar Conta')}
+                                </button>
+                            </form>
+                            
+                            <div className="form-toggle">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsLogin(!isLogin)}
+                                >
+                                    {isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Faça login'}
+                                </button>
+                            </div>
+                            
+                            <div className="demo-accounts">
+                                <strong>🎯 Contas Demo - Teste Agora!</strong>
+                                <div className="demo-account">joao@mobile.com / 123456</div>
+                                <div className="demo-account">maria@mobile.com / 123456</div>
+                                <div className="demo-account">carlos@mobile.com / 123456</div>
+                            </div>
+                            
+                            <div className="github-info">
+                                <strong>🚀 Hospedado no GitHub Pages</strong>
+                                <small>Sistema desenvolvido com React + Bootstrap<br/>
+                                Funciona offline após o primeiro carregamento</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+        
+        const MobileDashboard = ({ user, onLogout }) => {
+            const [transactions, setTransactions] = useState([]);
+            const [stats, setStats] = useState({
+                totalReceitas: 0,
+                totalDespesas: 0,
+                saldo: 0
+            });
+            const [showForm, setShowForm] = useState(false);
+            const [newTransaction, setNewTransaction] = useState({
+                type: 'receita',
+                description: '',
+                amount: '',
+                date: new Date().toISOString().split('T')[0]
+            });
+            
+            useEffect(() => {
+                const userTransactions = LocalStorage.getUserTransactions(user.id);
+                setTransactions(userTransactions.sort((a, b) => new Date(b.date) - new Date(a.date)));
+                
+                const receitas = userTransactions.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.amount, 0);
+                const despesas = userTransactions.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.amount, 0);
+                
+                setStats({
+                    totalReceitas: receitas,
+                    totalDespesas: despesas,
+                    saldo: receitas - despesas
+                });
+            }, [user.id]);
+            
+            const handleAddTransaction = (e) => {
+                e.preventDefault();
+                
+                const transaction = {
+                    id: Date.now(),
+                    type: newTransaction.type,
+                    description: newTransaction.description,
+                    amount: parseFloat(newTransaction.amount),
+                    date: newTransaction.date
+                };
+                
+                const updatedTransactions = [transaction, ...transactions];
+                setTransactions(updatedTransactions);
+                LocalStorage.saveUserTransactions(user.id, updatedTransactions);
+                
+                // Recalcular estatísticas
+                const receitas = updatedTransactions.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.amount, 0);
+                const despesas = updatedTransactions.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.amount, 0);
+                
+                setStats({
+                    totalReceitas: receitas,
+                    totalDespesas: despesas,
+                    saldo: receitas - despesas
+                });
+                
+                setNewTransaction({
+                    type: 'receita',
+                    description: '',
+                    amount: '',
+                    date: new Date().toISOString().split('T')[0]
+                });
+                setShowForm(false);
+            };
+            
+            const deleteTransaction = (id) => {
+                if (confirm('Tem certeza que deseja excluir esta transação?')) {
+                    const updatedTransactions = transactions.filter(t => t.id !== id);
+                    setTransactions(updatedTransactions);
+                    LocalStorage.saveUserTransactions(user.id, updatedTransactions);
+                    
+                    // Recalcular estatísticas
+                    const receitas = updatedTransactions.filter(t => t.type === 'receita').reduce((sum, t) => sum + t.amount, 0);
+                    const despesas = updatedTransactions.filter(t => t.type === 'despesa').reduce((sum, t) => sum + t.amount, 0);
+                    
+                    setStats({
+                        totalReceitas: receitas,
+                        totalDespesas: despesas,
+                        saldo: receitas - despesas
+                    });
+                }
+            };
+            
+            return (
+                <div className="mobile-app slide-in">
+                    <div className="mobile-header">
+                        <h1>
+                            <i className="fas fa-mobile-alt me-2"></i>
+                            Easy Finance
+                        </h1>
+                        <div className="subtitle">Olá, {user.name}!</div>
+                    </div>
+                    
+                    <div className="mobile-content">
+                        <div className="saldo-card">
+                            <div className="value">R$ {stats.saldo.toLocaleString('pt-BR')}</div>
+                            <div className="label">Saldo Atual</div>
+                        </div>
+                        
+                        <div className="stat-cards">
+                            <div className="stat-card receita">
+                                <div className="icon">
+                                    <i className="fas fa-arrow-up"></i>
+                                </div>
+                                <div className="value">R$ {stats.totalReceitas.toLocaleString('pt-BR')}</div>
+                                <div className="label">Receitas</div>
+                            </div>
+                            <div className="stat-card despesa">
+                                <div className="icon">
+                                    <i className="fas fa-arrow-down"></i>
+                                </div>
+                                <div className="value">R$ {stats.totalDespesas.toLocaleString('pt-BR')}</div>
+                                <div className="label">Despesas</div>
+                            </div>
+                        </div>
+                        
+                        {showForm && (
+                            <div className="transaction-form fade-in">
+                                <h5 className="mb-3">Nova Transação</h5>
+                                <form onSubmit={handleAddTransaction}>
+                                    <div className="mb-3">
+                                        <select
+                                            className="form-select"
+                                            value={newTransaction.type}
+                                            onChange={(e) => setNewTransaction({...newTransaction, type: e.target.value})}
+                                        >
+                                            <option value="receita">💰 Receita</option>
+                                            <option value="despesa">💸 Despesa</option>
+                                        </select>
+                                    </div>
+                                    <div className="mb-3">
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Descrição"
+                                            value={newTransaction.description}
+                                            onChange={(e) => setNewTransaction({...newTransaction, description: e.target.value})}
+                                            required
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <input
+                                            type="number"
+                                            className="form-control"
+                                            placeholder="Valor"
+                                            value={newTransaction.amount}
+                                            onChange={(e) => setNewTransaction({...newTransaction, amount: e.target.value})}
+                                            required
+                                            step="0.01"
+                                            min="0"
+                                        />
+                                    </div>
+                                    <div className="mb-3">
+                                        <input
+                                            type="date"
+                                            className="form-control"
+                                            value={newTransaction.date}
+                                            onChange={(e) => setNewTransaction({...newTransaction, date: e.target.value})}
+                                            required
+                                        />
+                                    </div>
+                                    <button type="submit" className="btn btn-success mb-2">
+                                        <i className="fas fa-save me-2"></i>Salvar
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className="btn btn-secondary"
+                                        onClick={() => setShowForm(false)}
+                                    >
+                                        Cancelar
+                                    </button>
+                                </form>
+                            </div>
+                        )}
+                        
+                        <div className="transaction-list">
+                            <div className="d-flex justify-content-between align-items-center mb-3">
+                                <h5>Transações</h5>
+                                <button
+                                    className="btn btn-sm btn-outline-primary"
+                                    onClick={onLogout}
+                                >
+                                    <i className="fas fa-sign-out-alt"></i>
+                                </button>
+                            </div>
+                            
+                            {transactions.length === 0 ? (
+                                <div className="empty-state">
+                                    <i className="fas fa-inbox"></i>
+                                    <h6>Nenhuma transação</h6>
+                                    <p>Toque no botão + para adicionar</p>
+                                </div>
+                            ) : (
+                                transactions.map(transaction => (
+                                    <div key={transaction.id} className={`transaction-item ${transaction.type}`}>
+                                        <div className="transaction-header">
+                                            <div className="transaction-title">{transaction.description}</div>
+                                            <div className="d-flex align-items-center">
+                                                <div className={`transaction-amount ${transaction.type} me-2`}>
+                                                    {transaction.type === 'receita' ? '+' : '-'}R$ {transaction.amount.toLocaleString('pt-BR')}
+                                                </div>
+                                                <button
+                                                    className="btn btn-sm btn-outline-danger"
+                                                    onClick={() => deleteTransaction(transaction.id)}
+                                                    style={{width: '30px', height: '30px', borderRadius: '50%'}}
+                                                >
+                                                    <i className="fas fa-trash" style={{fontSize: '0.7rem'}}></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="transaction-date">
+                                            {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div className="mobile-footer">
+                        <small className="text-muted">
+                            <i className="fab fa-github me-1"></i>
+                            Easy Finance Mobile - Hospedado no GitHub Pages
+                        </small>
+                    </div>
+                    
+                    <div className="quick-add">
+                        <button
+                            onClick={() => setShowForm(!showForm)}
+                            title="Adicionar transação"
+                        >
+                            <i className={`fas fa-${showForm ? 'times' : 'plus'}`}></i>
+                        </button>
+                    </div>
+                </div>
+            );
+        };
+        
+        const App = () => {
+            const { user, isLoading, login, register, logout } = useAuth();
+            
+            return user ? (
+                <MobileDashboard user={user} onLogout={logout} />
+            ) : (
+                <MobileLogin onLogin={login} onRegister={register} isLoading={isLoading} />
+            );
+        };
+        
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
